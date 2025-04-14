@@ -58,6 +58,7 @@ runs:
         echo "latest-tag=${{ steps.build_type.outputs.type == 'prod' && 'latest' || 'latest-dev' }}" >> $GITHUB_OUTPUT
       shell: bash
     - name: Build and publish image
+      id: build_and_publish
       uses: docker/build-push-action@v6
       with:
         platforms: ${{ inputs.platforms }}
