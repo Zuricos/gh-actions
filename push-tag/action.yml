@@ -1,0 +1,25 @@
+name: Push Tag
+
+inputs:
+  tag:
+    description: "The tag to push"
+    required: true
+    type: string
+  github-token:
+    description: "The GitHub token to use for authentication, with at least contents:write permissions"
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Push tag
+      run: git tag ${{ inputs.tag }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+    - name: Push tag
+      run: git push origin ${{ inputs.tag }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}

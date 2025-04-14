@@ -1,0 +1,29 @@
+name: Build and Test .NET Project
+
+inputs:
+  path:
+    description: "Path to the dotnet project solution"
+    required: true
+    type: string
+  dotnet-version:
+    description: "The version of .NET to use"
+    type: string
+    required: true
+    default: "8.0.x"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+    - name: Restore dependencies
+      run: dotnet restore ${{ inputs.path }}
+      shell: bash
+    - name: Build
+      run: dotnet build ${{ inputs.path }} --no-restore
+      shell: bash
+    - name: Test
+      run: dotnet test --verbosity normal --no-build ${{ inputs.path }}
+      shell: bash
