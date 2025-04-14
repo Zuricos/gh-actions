@@ -31,6 +31,11 @@ inputs:
     required: false
     default: "linux/amd64, linux/arm64"
 
+outputs:
+  image-digest:
+    description: "Digest of the published Docker image"
+    value: ${{ steps.build_and_publish.outputs.digest }}
+
 runs:
   using: "composite"
   steps:
