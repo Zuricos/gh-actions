@@ -50,7 +50,7 @@ runs:
     - name: Set latest or latest-dev
       id: set_latest
       run: |
-        echo "latest-tag=${{ steps.build_type.outputs.type == 'prod' && 'latest' || 'latest-dev' }}" >> $GITHUB_ENV
+        echo "latest-tag=${{ steps.build_type.outputs.type == 'prod' && 'latest' || 'latest-dev' }}" >> $GITHUB_OUTPUT
       shell: bash
     - name: Build and publish image
       uses: docker/build-push-action@v6
