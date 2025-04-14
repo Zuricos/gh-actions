@@ -1,6 +1,5 @@
 name: Compute version
 
-
 inputs:
   prefix:
     type: string
@@ -13,16 +12,16 @@ inputs:
 outputs:
   version:
     description: The computed version
-    value: ${{ jobs.compute-version.outputs.version }}
+    value: ${{ steps.semantic-version.outputs.version }}
   version_tag:
     description: The computed version tag
-    value: ${{ jobs.compute-version.outputs.version_tag }}
+    value: ${{ steps.semantic-version.outputs.version_tag }}
   hasNextVersion:
     description: Whether there is a next version
-    value: ${{ jobs.compute-version.outputs.hasNextVersion }}
+    value: ${{ steps.semantic-version.outputs.changed }}
   suffix:
     description: The computed suffix
-    value: ${{ jobs.compute-version.outputs.suffix }}
+    value: ${{ steps.set_suffix.outputs.suffix }}
 
 runs:
   using: "composite"
@@ -30,7 +29,7 @@ runs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-      shell: bash
+
     - name: Get next version
       uses: PaulHatch/semantic-version@v5.4.0
       id: semantic-version
@@ -42,18 +41,19 @@ runs:
         bump_each_commit_patch_pattern: "fix"
         version_format: "${major}.${minor}.${patch}"
         change_path: ${{ inputs.paths }}
-      shell: bash
+
     - name: Set suffix
       id: set_suffix
       if: ${{ github.event_name == 'pull_request' }}
       run: echo "suffix=-pr.${{ github.event.pull_request.number }}.${{ github.run_number }}" >> $GITHUB_OUTPUT
       shell: bash
+
     - name: Outputs
       run: |
         echo "Previous Version: ${{ steps.semantic-version.outputs.previous_version }}"
         echo "Version: ${{ steps.semantic-version.outputs.version }}"
-        echo "Version Tag: ${{steps.semantic-version.outputs.version_tag}}"
-        echo "Changed: ${{steps.semantic-version.outputs.changed}}"
-        echo "Increment: ${{steps.semantic-version.outputs.increment}}"
-        echo "Is Tagged: ${{steps.semantic-version.outputs.is_tagged}}"
-      shell: bash compute-version:
+        echo "Version Tag: ${{ steps.semantic-version.outputs.version_tag }}"
+        echo "Changed: ${{ steps.semantic-version.outputs.changed }}"
+        echo "Increment: ${{ steps.semantic-version.outputs.increment }}"
+        echo "Is Tagged: ${{ steps.semantic-version.outputs.is_tagged }}"
+      shell: bash
