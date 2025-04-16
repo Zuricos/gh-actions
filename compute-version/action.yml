@@ -25,7 +25,7 @@ outputs:
     value: ${{ steps.semantic-version.outputs.version_tag }}
   needs_bump:
     description: Whether to bump the version
-    value: ${{ steps.check_bump.outputs.needs_bump }}
+    value: ${{ steps.check_bump_version.outputs.needs_bump }}
   suffix:
     description: The computed suffix
     value: ${{ steps.set_suffix.outputs.suffix }}
