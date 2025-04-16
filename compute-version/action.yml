@@ -8,17 +8,27 @@ inputs:
     type: string
     required: false
     description: A space-separated list of paths to monitor for changes. If not provided, the entire repository is monitored.
+  main_branch:
+    type: string
+    required: false
+    description: The main branch to compare against. Defaults to the default branch of the repository.
 
 outputs:
+  previous_version:
+    description: The previous version
+    value: ${{ steps.semantic-version.outputs.previous_version }}
   version:
     description: The computed version
     value: ${{ steps.semantic-version.outputs.version }}
   version_tag:
     description: The computed version tag
     value: ${{ steps.semantic-version.outputs.version_tag }}
-  hasNextVersion:
+  hasChanges:
     description: Whether there is a next version
     value: ${{ steps.semantic-version.outputs.changed }}
+  bumpReleaseVersion:
+    description: Whether to bump the release version
+    value: ${{ steps.check_release.outputs.release }}
   suffix:
     description: The computed suffix
     value: ${{ steps.set_suffix.outputs.suffix }}
@@ -56,4 +66,24 @@ runs:
         echo "Changed: ${{ steps.semantic-version.outputs.changed }}"
         echo "Increment: ${{ steps.semantic-version.outputs.increment }}"
         echo "Is Tagged: ${{ steps.semantic-version.outputs.is_tagged }}"
+      shell: bash
+    - name: Check if release
+      id: check_release
+      run: |
+        # Get the current branch name
+        CURRENT_BRANCH=$(git branch --show-current)
+        # Get the default branch name if main_branch input is not provided
+        if [[ -z "${{ inputs.main_branch }}" ]]; then
+          DEFAULT_BRANCH=$(git remote show origin | grep 'HEAD branch' | cut -d':' -f2 | xargs)
+          MAIN_BRANCH="$DEFAULT_BRANCH"
+        else
+          MAIN_BRANCH="${{ inputs.main_branch }}"
+        fi
+
+        # Check if we're on main/default branch and if versions are different
+        if [[ "$CURRENT_BRANCH" == "$MAIN_BRANCH" && "${{ steps.semantic-version.outputs.previous_version }}" != "${{ steps.semantic-version.outputs.version }}" ]]; then
+          echo "release=true" >> $GITHUB_OUTPUT
+        else
+          echo "release=false" >> $GITHUB_OUTPUT
+        fi
       shell: bash
