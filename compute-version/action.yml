@@ -14,6 +14,9 @@ inputs:
     description: The main branch to compare against. Defaults to the default branch of the repository.
 
 outputs:
+  prefix:
+    description: The prefix used for the version
+    value: ${{ steps.set_prefix.outputs.prefix }}
   previous_version:
     description: The previous version
     value: ${{ steps.semantic-version.outputs.previous_version }}
@@ -49,6 +52,11 @@ runs:
         version_format: "${major}.${minor}.${patch}"
         change_path: ${{ inputs.paths }}
 
+    - name: Set prefix
+      id: set_prefix
+      run: echo "prefix=${{ inputs.prefix }}-" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Set suffix
       id: set_suffix
       if: ${{ github.event_name == 'pull_request' && steps.semantic-version.outputs.changed == 'true' }}
@@ -72,6 +80,7 @@ runs:
         echo "Previous Version: ${{ steps.semantic-version.outputs.previous_version }}"
         echo "Version: ${{ steps.semantic-version.outputs.version }}"
         echo "Version Tag: ${{ steps.semantic-version.outputs.version_tag }}"
+        echo "Prefix: ${{ steps.set_prefix.outputs.prefix }}"
         echo "Suffix: ${{ steps.set_suffix.outputs.suffix }}"
         echo "Needs Bump: ${{ steps.check_bump_version.outputs.needs_bump }}"
         echo "Increment: ${{ steps.semantic-version.outputs.increment }}"
