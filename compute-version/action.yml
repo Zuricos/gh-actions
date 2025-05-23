@@ -40,22 +40,22 @@ runs:
       with:
         fetch-depth: 0
 
+    - name: Set prefix
+      id: set_prefix
+      run: echo "prefix=${{ inputs.prefix }}-" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Get next version
       uses: PaulHatch/semantic-version@v5.4.0
       id: semantic-version
       with:
-        tag_prefix: ${{ inputs.prefix }}
+        tag_prefix: ${{ steps.set_prefix.outputs.prefix }}
         major_pattern: "feat!"
         minor_pattern: "feat"
         bump_each_commit: true
         bump_each_commit_patch_pattern: "fix"
         version_format: "${major}.${minor}.${patch}"
         change_path: ${{ inputs.paths }}
-
-    - name: Set prefix
-      id: set_prefix
-      run: echo "prefix=${{ inputs.prefix }}-" >> $GITHUB_OUTPUT
-      shell: bash
 
     - name: Set suffix
       id: set_suffix
